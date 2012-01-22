@@ -9,28 +9,29 @@ var request = require('request')
 
 module.exports = function (t, rewrites, options) {
   if (options) _.extend(opts, options)
-  
-  var _handlers = {
-    "_view": function(rewrite, req, resp) {
-      proxyCouch(rewrite, req, resp)
-    }
+
+  function proxyCouch(rewrite) {
+    t.route(rewrite.from, function(req, resp) {
+      var url = opts.ddoc + rewrite.to
+      var query = rewrite.query
+      if (req.query) _.extend(query, req.query)
+      if (query) url += "?" + qs.stringify(query)
+      request({url:url, json:true}).pipe(resp)
+    })
+    // var url = opts.ddoc + req.route.splats.join('/') 
   }
   
-  function proxyCouch(rewrite, req, resp) {
-    // var url = opts.ddoc + req.route.splats.join('/') 
-    var url = opts.ddoc + rewrite.to
-    var query = rewrite.query
-    if (req.query) _.extend(query, req.query)
-    if (query) url += "?" + qs.stringify(query)
-    request({url:url, json:true}).pipe(resp)
+  function proxyFile(rewrite, req, resp) {
+    t.route(rewrite.from, function(req, resp) {
+      filed(path.resolve(opts.attachments, rewrite.to)).pipe(resp)
+    })
   }
   
   _.each(rewrites, function(rewrite) {
     var to = rewrite.to
     if (_.first(to) === "/") to = _.rest(to).join('')
-    if (_.first(to) === '_') t.route(rewrite.from, function(req, resp) {
-      _handlers[_.first(to.split('/'))](rewrite, req, resp)
-    })
+    if (_.first(to) === '_') proxyCouch(rewrite)
+    if (_.last(to.split('/')).match(/\./)) proxyFile(rewrite)
   })
   t.route('/*').files(opts.attachments)
 }
