@@ -1,0 +1,144 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="utf-8"> 
+	<title>Relaxed.tv - CouchDB Movietime!</title> 
+  <!--[if IE]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style>
+    article, aside, dialog, figure, footer, header,
+    hgroup, menu, nav, section { display: block; }
+  </style>
+  <link rel="stylesheet" href="style/custom.css" type="text/css" media="screen, projection" />
+  <link rel="stylesheet" href="style/print.css" type="text/css" media="print" />
+  <!--[if lt IE 8]>
+    <link rel="stylesheet" href="style/ie.css" type="text/css" media="screen, projection" />
+  <![endif]-->
+	<script type="text/javascript" src="script/lib/jquery-1.6.1.min.js"></script>
+	<script type="text/javascript" src="script/lib/jquery.mustache.js"></script>
+	<script type="text/javascript" src="script/lib/jquery.hashgrid.js"></script>
+	<script type="text/javascript" src="script/lib/jquery.couch2.js"></script>
+	<script type="text/javascript" src="script/lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="script/lib/sammy-0.6.3.min.js"></script>
+	<script type="text/javascript" src="script/lib/underscore.js"></script>
+	<script type="text/javascript" src="script/lib/microevent.js"></script>
+	<script type="text/javascript" src="script/relaxedtv.js"></script>
+	<script type="text/javascript" src="script/util.js"></script>
+	<script type="text/javascript" src="script/site.js"></script>
+</head> 
+<body id="body" class="body">
+  <div class="header">
+    <div class="container">
+      <p class="claim">sit back, relax and learn about couchdb</p>
+      <img class="logo" src="images/relaxedtvlogo.png"></img>
+    </div>
+  </div>
+
+  <div class="video_wrapper">
+    <div class="video_container">
+      <div class="container">
+
+         <div class="videos">
+           <h2>Videos</h2>
+           <ul class="video_list">
+             
+           </ul>
+           <p>
+             <a href="#upload">Add a video!</a>
+             |
+             <a href="http://relaxed.tv:5984/relaxedtv/_design/recline/_rewrite">Browse video API</a>
+           </p>
+         </div>
+
+         <div class="video">
+           
+         </div>
+       </div>
+    </div>
+  </div>
+  
+  <div class="dialog-overlay">&nbsp;</div>
+  <div class="dialog ui-draggable">
+  	<div class="dialog-frame">
+  		<div class="dialog-content dialog-border"></div>
+  	</div>
+  </div>
+  
+  <span class="pageinfo">Design thanks to <a href="http://www.kristinaschneider.com">Kriesse</a>. <a href="http://github.com/maxogden/relaxed.tv">Fork the source code</a></span>
+  
+  <script type='text/mustache' class="videoListTemplate">
+    {{#videos}}
+      <li><a href="#video/{{_id}}" data-id="{{_id}}" class="videoListItem">&#x261E; {{title}}</a></li>
+    {{/videos}}
+    </ul>
+	</script>
+	
+	<script type='text/mustache' class="youtubeTemplate">
+  	<h3>{{title}}</h3>
+    <iframe width="425" height="349" src="http://www.youtube.com/embed/{{videoid}}" frameborder="0" allowfullscreen></iframe>
+	</script>
+	
+	<script type='text/mustache' class="vimeoTemplate">
+	  <h3>{{title}}</h3>
+    <iframe src="http://player.vimeo.com/video/{{videoid}}?title=1&byline=1&portrait=1&" width="425" height="349" frameborder="0"></iframe>
+	</script>
+	
+	<script class="uploadTemplate" type="text/mustache">
+    <div class="devseed alpha">
+      <div id="content" class="page-content clear-block">
+        <div id="content-wrapper">
+          <div>
+            <div class="form form-layout-default clear-block">
+              <input type="hidden" name="type" value="single_upload">
+              <div class="column-main">
+                <form action="#" accept-charset="UTF-8" method="post" id="upload-form" enctype="multipart/form-data">
+                  <div class="column-wrapper clear-block">
+                    <fieldset class="fieldset titled collapsible collapsed tao-processed">
+                      <legend><span class="fieldset-title"><a class="active">Video Details</a></span></legend>
+                      <div class="fieldset-content clear-block ">
+                        <div class="form-item form-option">
+                          <label for="url">Title</label>
+                          <input type="text" maxlength="128" name="title" id="video-title" value="" class="form-text fluid persist">
+                          <div class="description">
+                            What is the title of the video?
+                          </div>
+                        </div>
+                        <div class="form-item form-option">
+                          <label for="url">Video URL</label>
+                          <input type="text" maxlength="128" name="url" id="video-url" value="" class="form-text fluid persist">
+                          <div class="description">
+                            What is the full URL for this video? Must be Youtube or Vimeo e.g. http://vimeo.com/26147136
+                          </div>
+                        </div>
+                      </div>
+                    </fieldset>
+                    <div class="buttons">
+                      <input type="submit" name="op" id="edit-submit-1" value="Submit" class="form-submit">
+                      <span class="smallMessage">Your video will be added to Relaxed.tv after it gets spam-checked</span>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </script>
+  
+	<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-24916412-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+</body>
+</html>

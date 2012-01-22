@@ -1,0 +1,66 @@
+
+/**
+ * Grid
+ */
+#grid{
+
+    /* Vertical grid lines */
+    background: url('../images/hashgrid.png') repeat-y 0 0;
+
+    /* Dimensions - same width as your grid with gutters */
+    width: 940px;
+
+    /* Grid (left-aligned)
+    position: absolute;
+    top: 0;
+    left: 0;
+    */
+
+    /* Grid (centered) */
+    position: absolute;
+    top: 0;
+    left: 50%;
+    margin-left: -470px;
+    
+    z-index: 3;
+
+}
+
+/**
+ * Classes for multiple grids
+ *
+ * When using more than one grid, remember to set the numberOfGrids 
+ * option in the hashgrid.js file.
+ */
+#grid.grid-1{
+
+    /* Vertical grid lines for grid 1 */
+    background: url(../images/hashgrid.png) repeat-y 0 0;
+
+}
+#grid.grid-2{
+
+    /* Vertical grid lines for grid 2 */
+    background: url(bg-grid-660.gif) repeat-y 160px 0;
+
+    /* Adjustments */
+    padding: 0 160px;
+    width: 660px;
+
+}
+
+/**
+ * Horizontal grid lines, defined by your base line height
+ *
+ * Remember, the CSS properties that define the box model:
+ * visible height = height + borders + margins + padding
+ */
+#grid div.horiz{
+
+    /* 24px line height */
+    height: 23px;
+    border-bottom: 1px dotted #aaa;
+    margin: 0;
+    padding: 0;
+
+}
