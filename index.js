@@ -1,5 +1,4 @@
 var request = require('request')
-  , couch = require('couch')
   , qs = require('querystring')
   , filed = require('filed')
   , path = require('path')
@@ -15,7 +14,6 @@ module.exports = function (t, rewrites, options) {
       to = to.replace(':' + param, val)
       if (query) {
         _.each(query, function(queryVal, queryKey) {
-          // var newVal = _.isArray(queryVal) ? JSON.stringify(queryVal) : queryVal
           function replaceSymbol(input) {
             if (!_.isString(input)) return input
             return input.replace(':' + param, val)
