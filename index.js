@@ -3,22 +3,50 @@ var request = require('request')
   , qs = require('querystring')
   , filed = require('filed')
   , path = require('path')
+  , url = require('url')
   , _ = require('underscore')
   , opts = require('./defaults')()
-  ;
 
 module.exports = function (t, rewrites, options) {
   if (options) _.extend(opts, options)
 
-  function proxyCouch(rewrite) {
-    t.route(rewrite.from, function(req, resp) {
-      var url = opts.ddoc + rewrite.to
-      var query = rewrite.query
-      if (req.query) _.extend(query, req.query)
-      if (query) url += "?" + qs.stringify(query)
-      request({url:url, json:true}).pipe(resp)
+  function resolveSymbols(to, params, query) {
+    _.each(params, function(val, param) {
+      to = to.replace(':' + param, val)
+      if (query) {
+        _.each(query, function(queryVal, queryKey) {
+          // var newVal = _.isArray(queryVal) ? JSON.stringify(queryVal) : queryVal
+          function replaceSymbol(input) {
+            if (!_.isString(input)) return input
+            return input.replace(':' + param, val)
+          }
+          var newVal = _.isArray(queryVal) ? _.map(queryVal, replaceSymbol) : replaceSymbol(queryVal)
+          query[queryKey] = newVal
+        })
+      }
     })
-    // var url = opts.ddoc + req.route.splats.join('/') 
+  }
+  
+  function proxyRequest(rewrite) {
+    t.route(rewrite.from, function(req, resp) {
+      var to = rewrite.to
+        , query = _.extend({}, rewrite.query)
+      if (req.route.splats) to = to.replace('*', req.route.splats.join('/'))
+      if (req.query) _.extend(query, qs.parse(req.query))
+      if (query && req.route.params) resolveSymbols(to, req.route.params, query)
+      if (query.key) query.key = JSON.stringify(query.key)
+      if (query.startkey) query.startkey = JSON.stringify(query.startkey)
+      if (query.endkey) query.endkey = JSON.stringify(query.endkey)
+      if (query) to += "?" + qs.stringify(query)
+      request({url: to, json: rewrite.json}).pipe(resp)
+    })
+  }
+  
+  function proxyCouch(rewrite) {
+    proxyRequest(_.extend({}, rewrite, {
+      to: opts.ddoc + rewrite.to,
+      json: true
+    }))
   }
   
   function proxyFile(rewrite, req, resp) {
@@ -29,10 +57,13 @@ module.exports = function (t, rewrites, options) {
   
   _.each(rewrites, function(rewrite) {
     var to = rewrite.to
+      , protocol = url.parse(to).protocol
     if (_.first(to) === "/") to = _.rest(to).join('')
-    if (_.first(to) === '_') proxyCouch(rewrite)
-    if (_.last(to.split('/')).match(/\./)) proxyFile(rewrite)
+    if (_.first(to) === '_') return proxyCouch(rewrite)
+    if (protocol && protocol.match(/https?/i)) return proxyRequest(rewrite)
+    else return proxyFile(rewrite)
   })
+
   t.route('/*').files(opts.attachments)
 }
 

@@ -2,7 +2,7 @@ var _ = require('underscore')
   , url = require('url')
   , path = require('path')
   , defaults = 
-    { ddoc: "http://localhost:5984/test/_design/test"
+    { ddoc: "http://data.ic.ht/datacouch/_design/datacouch"
     , vhost: "http://example.com"
     , port: 9999
     , attachments: path.resolve(__dirname)
