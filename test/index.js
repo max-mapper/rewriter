@@ -50,14 +50,8 @@ var tako = require('tako')
     ]
   ;
 
-function createServer(cb) {
   var t = tako()
   rewriter(t, rewrites, {attachments: path.resolve(__dirname, 'attachments')})
   t.listen(function(handler) {
     return http.createServer(handler)
-  }, 9999, cb)
-}
-
-createServer(function() {
-  console.log('running')
-})
+  }, 9999)
