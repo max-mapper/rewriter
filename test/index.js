@@ -7,8 +7,15 @@ var tako = require('tako')
   , path = require('path')
   , couch = "http://data.ic.ht"
   , rewriter = require('../')
+  , validate = function(req, res, callback) {
+    callback()
+    // req.on('body', function(data) {
+    //       console.log("doc data!", data)
+    //       
+    //     })
+  }
   , rewrites = [ 
-      { from:"/", to:'pages/index.html', before: function(req, res) { console.log(req.connection.remoteAddress) }}
+      { from:"/", to:'pages/index.html', before: function(req, res, cb) { console.log(req.connection.remoteAddress); cb() }}
     , { from:"/edit", to:"pages/recline.html"}
     , { from:"/edit/*", to:"pages/recline.html"}
     , { from:"/proxy", to: couch + "/_smalldata/"}
@@ -39,7 +46,7 @@ var tako = require('tako')
     , { from:"/api", to: couch + "/datacouch"}
     , { from:"/api/*", to: couch + "/datacouch/*"}
     , { from:"/analytics.gif", to: couch + "/_analytics/spacer.gif"}
-    , { before: function(req, res) { console.log(req.connection.remoteAddress) }
+    , { before: validate
       , rewrites: [
           {from:"/db/:id/csv", to: couch + '/:id/_design/recline/_list/csv/all'}
         , {from:"/db/:id/json", to: couch + '/:id/_design/recline/_list/bulkDocs/all'}

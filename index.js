@@ -1,4 +1,5 @@
 var request = require('request')
+  , bouncy = require('bouncy')
   , qs = require('querystring')
   , filed = require('filed')
   , path = require('path')
@@ -27,14 +28,41 @@ module.exports = function (t, rewrites, options) {
   }
   
   function createProxy(req, resp, opts) {
-    var proxy = request(opts)
-    req.pipe(proxy)
-    proxy.pipe(resp)
+    req.on('data', function(data) {
+      if (data.isgood) req.pipe(request("http://localhost:9998"))
+    })
+    req.on('end', function() {
+      
+    })
+    // var dest = url.parse(opts.url)
+    // bouncy(function (reqst, bounce) {
+    //   var data = ""
+    //   reqst.on('data', function (buf) { data += buf })
+    //   reqst.on('end', function () {
+    //     // inspect data, then:
+    //     bounce({ port: dest.port, path: dest.path, headers: {host: dest.host} })
+    //   })
+    // }).listen(9998)
+  }
+  
+  function route(rewrite, callback) {
+    t.route(rewrite.from, function(req, resp) {
+      if (!rewrite.before) return callback(req, resp)
+      rewrite.before(req, resp, function(err) {
+        if (err) console.error(err)
+        else callback(req, resp)
+      })
+    })
+  }
+  
+  function proxyFile(rewrite, req, resp) {
+    route(rewrite, function(req, resp) {
+      filed(path.resolve(opts.attachments, rewrite.to)).pipe(resp)
+    })
   }
   
   function proxyRequest(rewrite) {
-    t.route(rewrite.from, function(req, resp) {
-      if (rewrite.before) rewrite.before(req, resp)
+    route(rewrite, function(req, resp) {
       var to = rewrite.to
         , query = _.extend({}, rewrite.query)
       if (req.route.splats) to = to.replace('*', req.route.splats.join('/'))
@@ -44,7 +72,9 @@ module.exports = function (t, rewrites, options) {
       if (query.startkey) query.startkey = JSON.stringify(query.startkey)
       if (query.endkey) query.endkey = JSON.stringify(query.endkey)
       if (_.keys(query).length) to += "?" + qs.stringify(query)
-      createProxy(req, resp, {url: to, json: rewrite.json})
+      var opts = {url: to}
+      if (rewrite.json) opts.json = rewrite.json
+      createProxy(req, resp, opts)
     })
   }
   
@@ -53,13 +83,6 @@ module.exports = function (t, rewrites, options) {
       to: opts.ddoc + rewrite.to,
       json: true
     }))
-  }
-  
-  function proxyFile(rewrite, req, resp) {
-    t.route(rewrite.from, function(req, resp) {
-      if (rewrite.before) rewrite.before(req, resp)
-      filed(path.resolve(opts.attachments, rewrite.to)).pipe(resp)
-    })
   }
   
   function flattenRewrites(rewrites) {
