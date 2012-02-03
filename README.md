@@ -34,6 +34,24 @@ rewriter was built to work easily with couchdb! you can do things like serve cou
       ;
       
     rewriter(t, rewrites)
+    
+you can specify a middleware function that proxied request will be run through either singularly or using a group:
+
+    var rewrites = [ 
+          {from:"/awesome", to: couch + "/", before: function(req, res) { console.log(req.connection.remoteAddress) }}
+        , {before: function(req, res) { if (req.headers.referrer !== "awesome.com") res.end('go away hotlinkers') }
+          , rewrites: [
+              {from:"/api/couch/*", to: couch + "/*"}
+            , {from:"/api", to: couch + "/appdatabase"}
+            , {from:"/api/*", to: couch + "/appdatabase/*"}
+            , {from:"/db/:id", to: couch + "/:id/"}
+            , {from:"/db/:id/*", to: couch + "/:id/*"}
+            ]
+          }
+        ]
+      ;
+
+    rewriter(t, rewrites)
 
 there is also a shorthand for querying the couch view server (start to: with _ and pass in the design document URL):
 
