@@ -46,7 +46,7 @@ module.exports = function (t, rewrites, options) {
       req.pipe(stream)
       
       rewrite.before(req, resp, function(err) {
-        if (err) res.end(err)
+        if (err) resp.end(err)
         else callback(req, resp)
       })
     })
