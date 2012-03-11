@@ -27,8 +27,8 @@ module.exports = function (t, rewrites, options) {
     return to
   }
   
-  function createProxy(req, resp, opts, stream) {
-    var proxy = request(opts)
+  function createProxy(req, resp, proxyOpts, stream) {
+    var proxy = request(proxyOpts)
     req.pipe(proxy)
     if (stream) {
       stream.pipe(proxy)
@@ -52,9 +52,18 @@ module.exports = function (t, rewrites, options) {
     })
   }
   
-  function proxyFile(rewrite, req, resp) {
+  function proxyFile(rewrite) {
     route(rewrite, function(req, resp) {
-      filed(path.resolve(opts.attachments, rewrite.to)).pipe(resp)
+      var files = opts.attachments
+      if (!files) {
+        resp.statusCode = 404
+        return resp.end('not found')
+      }
+      if (_.isString(files) && files.match(/https?/i)) {
+        var to = opts.attachments + '/' + rewrite.to
+        return createProxy(req, resp, to)
+      }
+      filed(path.resolve(files, rewrite.to)).pipe(resp)
     })
   }
   
@@ -69,9 +78,9 @@ module.exports = function (t, rewrites, options) {
       if (query.startkey) query.startkey = JSON.stringify(query.startkey)
       if (query.endkey) query.endkey = JSON.stringify(query.endkey)
       if (_.keys(query).length) to += "?" + qs.stringify(query)
-      var opts = {url: to}
-      if (rewrite.json) opts.json = rewrite.json
-      createProxy(req, resp, opts, stream)
+      var proxyOpts = {url: to}
+      if (rewrite.json) proxyOpts.json = rewrite.json
+      createProxy(req, resp, proxyOpts, stream)
     })
   }
   
@@ -105,6 +114,6 @@ module.exports = function (t, rewrites, options) {
     else return proxyFile(rewrite)
   })
 
-  t.route('/*').files(opts.attachments)
+  if (opts.attachments) t.route('/*').files(opts.attachments)
 }
 

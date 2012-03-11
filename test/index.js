@@ -56,6 +56,5 @@ var tako = require('tako')
 
   var t = tako()
   rewriter(t, rewrites, {attachments: path.resolve(__dirname, 'attachments')})
-  t.listen(function(handler) {
-    return http.createServer(handler)
-  }, 9999)
+  t.httpServer.listen(9999)
+  console.log('listening on 9999')
