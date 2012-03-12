@@ -52,25 +52,24 @@ module.exports = function (t, rewrites, options) {
     })
   }
   
-  function proxyFile(rewrite) {
-    route(rewrite, function(req, resp) {
-      var files = opts.attachments
-      if (!files) {
-        resp.statusCode = 404
-        return resp.end('not found')
-      }
-      if (_.isString(files) && files.match(/https?/i)) {
-        var to = opts.attachments + '/' + rewrite.to
-        return createProxy(req, resp, to)
-      }
-      filed(path.resolve(files, rewrite.to)).pipe(resp)
-    })
+  function proxyFile(to, req, resp, rewrite) {
+    var files = opts.attachments
+    if (!files) {
+      resp.statusCode = 404
+      return resp.end('file not found')
+    }
+    if (_.isString(files) && files.match(/https?/i)) {
+      var dest = opts.attachments + '/' + to
+      return createProxy(req, resp, dest)
+    }
+    filed(path.resolve(files, to)).pipe(resp)
   }
   
   function proxyRequest(rewrite) {
     route(rewrite, function(req, resp, stream) {
       var to = rewrite.to
         , query = _.extend({}, rewrite.query)
+        , protocol = url.parse(to).protocol
       if (req.route.splats) to = to.replace('*', req.route.splats.join('/'))
       if (req.query) _.extend(query, qs.parse(req.query))
       if (req.route.params) to = resolveSymbols(to, req.route.params, query)
@@ -80,7 +79,8 @@ module.exports = function (t, rewrites, options) {
       if (_.keys(query).length) to += "?" + qs.stringify(query)
       var proxyOpts = {url: to}
       if (rewrite.json) proxyOpts.json = rewrite.json
-      createProxy(req, resp, proxyOpts, stream)
+      if ( protocol && protocol.match(/https?/i) ) createProxy(req, resp, proxyOpts, stream)
+      else proxyFile(to, req, resp, rewrite)
     })
   }
   
@@ -107,13 +107,8 @@ module.exports = function (t, rewrites, options) {
   
   _.each(flattenRewrites(rewrites), function(rewrite) {
     var to = rewrite.to
-      , protocol = url.parse(to).protocol
     if (_.first(to) === "/") to = _.rest(to).join('')
     if (_.first(to) === '_') return proxyCouch(rewrite)
-    if (protocol && protocol.match(/https?/i)) return proxyRequest(rewrite)
-    else return proxyFile(rewrite)
+    return proxyRequest(rewrite)
   })
-
-  if (opts.attachments) t.route('/*').files(opts.attachments)
 }
-
