@@ -6,7 +6,7 @@ var tako = require('tako')
   , http = require('http')
   , path = require('path')
   , couch = "http://localhost:5984"
-  , rewriter = require('../')
+  , Rewriter = require('../')
   , rewrites = [ 
       { from:"/", to:'pages/index.html', before: function(req, res, cb) { console.log(req.connection.remoteAddress); cb() }}
     , { from:"/edit", to:"pages/recline.html"}
@@ -55,6 +55,6 @@ var tako = require('tako')
   ;
 
   var t = tako()
-  rewriter(t, rewrites, {attachments: path.resolve(__dirname, 'attachments')})
+  new Rewriter(t, rewrites, {attachments: path.resolve(__dirname, 'attachments')})
   t.httpServer.listen(9999)
   console.log('listening on 9999')
