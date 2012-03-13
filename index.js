@@ -66,7 +66,6 @@ Rewriter.prototype.route = function(rewrite, callback) {
 
 Rewriter.prototype.proxyFile = function(to, req, resp, rewrite) {
   var self = this
-  console.log(self)
   var files = self.opts.attachments
   if (!files) {
     resp.statusCode = 404
