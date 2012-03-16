@@ -50,16 +50,19 @@ Rewriter.prototype.createProxy = function(req, resp, proxyOpts, stream) {
 }
 
 Rewriter.prototype.route = function(rewrite, callback) {
-  this.tako.route(rewrite.from, function(req, resp) {
+  if (typeof(rewrite.from) === "undefined") return console.error("NO FROM" + JSON.stringify(rewrite))
+  var from = rewrite.from
+  if (_.first(from) !== "/") from = "/" + from
+  this.tako.route(from, function(req, resp) {
     if (!rewrite.before) return callback(req, resp)
-    
+
     var stream = new BufferedStream
     stream.pause()
     req.pipe(stream)
     
     rewrite.before(req, resp, function(err) {
       if (err) resp.end(err)
-      else callback(req, resp)
+      else callback(req, resp, stream)
     })
   })
 }
