@@ -45,6 +45,6 @@ var tako = require('tako')
   ;
 
   var t = tako()
-  new Rewriter(t, rewrites, {root: "http://localhost:5984/datacouch/_design/datacouch", attachments: path.resolve(__dirname, 'attachments')})
+  new Rewriter(t, rewrites, {verbose: true, root: "http://localhost:5984/datacouch/_design/datacouch", attachments: path.resolve(__dirname, 'attachments')})
   t.httpServer.listen(9999)
   console.log('listening on 9999')

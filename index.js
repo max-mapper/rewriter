@@ -18,9 +18,13 @@ function Rewriter(tako, rewrites, options) {
   rewrites = self.normalizePaths(rewrites)
   
   _.each(rewrites, function(rewrite) {
-    console.log(rewrite.to)
+    if (self.opts.verbose) console.log(self.scrubPassword(rewrite.to))
     self.proxyRequest(rewrite)
   })
+}
+
+Rewriter.prototype.scrubPassword = function(url) {
+  return url.replace(/^(https?:\/\/[^@:]+):[^@]+@/, '$1:******@')
 }
 
 Rewriter.prototype.resolveSymbols = function(to, params, query) {
