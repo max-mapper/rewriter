@@ -1,7 +1,7 @@
 { "name" : "rewriter"
 , "description" : "streaming http + file routing proxy. serve apps easily!"
 , "tags" : ["framework", "server", "static", "couch", "couchdb", "nodepointjavascript"]
-, "version" : "0.0.9"
+, "version" : "0.0.11"
 , "author" : "Max Ogden <max@maxogden.com>"
 , "repository" :
   { "type" : "git"
@@ -11,4 +11,12 @@
   { "url" : "http://github.com/maxogden/rewriter/issues" }
 , "engines" : ["node >= 0.3.6"]
 , "main" : "./main"
+, "dependencies": {
+    "request": "2.9.3",
+    "filed": "0.0.6",
+    "underscore": "1.2.1",
+    "morestreams": "0.0.2"
+  }
 }
+
+

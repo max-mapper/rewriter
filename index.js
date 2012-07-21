@@ -92,7 +92,7 @@ Rewriter.prototype.proxyRequest = function(rewrite) {
     var to = rewrite.to
       , query = _.extend({}, rewrite.query)
       , protocol = url.parse(to).protocol
-    if (req.route.splats) to = to.replace('*', req.route.splats.join('/'))
+    if (req.route.extras) to = to.replace('*', req.route.extras.join('/'))
     if (req.query) _.extend(query, qs.parse(req.query))
     if (req.route.params) to = self.resolveSymbols(to, req.route.params, query)
     if (query.key) query.key = JSON.stringify(query.key)
